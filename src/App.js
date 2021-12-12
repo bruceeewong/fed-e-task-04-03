@@ -4,7 +4,7 @@ import ReactDOM from "react-dom";
 function render() {
   stateIndex = 0;  // 重新渲染时归零
   effectIndex = 0;  // effects下标归零
-  ReactDOM.render(<App />, document.getElementById('root'));
+  ReactDOM.render(<App/>, document.getElementById('root'));
 }
 
 let states = [];
@@ -26,7 +26,7 @@ function useState(initialState) {
   setters.push(createSetter(stateIndex));
   const state = states[stateIndex];
   const setState = setters[stateIndex];
-  stateIndex ++;
+  stateIndex++;
   return [state, setState];
 }
 
@@ -52,13 +52,38 @@ function useEffect(callback, depsAry) {
       callback()
     }
     prevDepsAry[effectIndex] = depsAry;
-    effectIndex ++;
+    effectIndex++;
   }
+}
+
+
+function useReducer(reducer, initialState) {
+  const [state, setState] = useState(initialState);
+
+  function dispatch(action) {
+    const newState = reducer(state, action);
+    setState(newState)
+  }
+
+  return [state, dispatch]
 }
 
 function App() {
   const [count, setCount] = useState(0);
   const [name, setName] = useState('张三');
+
+  function reducer(state, action) {
+    switch (action.type) {
+      case 'increment':
+        return state + 1;
+      case 'decrement':
+        return state - 1;
+      default:
+        return state;
+    }
+  }
+
+  const [num, dispatch] = useReducer(reducer, 0);
 
   useEffect(() => {
     console.log('hello');
@@ -73,6 +98,9 @@ function App() {
     <button onClick={() => setCount(count + 1)}>setCount</button>
     {name}
     <button onClick={() => setName('李四')}>setName</button>
+    {num}
+    <button onClick={() => dispatch({type: 'increment'})}>+num</button>
+    <button onClick={() => dispatch({type: 'decrement'})}>-num</button>
   </div>;
 }
 
